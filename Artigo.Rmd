@@ -1,0 +1,154 @@
+---
+title: "Redes Neurais e Regressão Polinomial"
+author:
+- Luiz Fernando Palin Droubi^[UFSC, luiz.droubi@planejamento.gov.br]
+- Carlos Augusto Zilli^[UFSC, carloszilli@hotmail.com]
+- Norberto Hochheim^[UFSC, hochheim@gmail.com]
+date: "`r format(Sys.Date(), '%d/%m/%Y')`"
+output:
+  pdf_document:
+    includes:
+      in_header: preamble.tex
+    keep_tex: yes
+    latex_engine: xelatex
+    number_sections: yes
+    toc: no
+  word_document: default
+  html_document:
+    fig_caption: yes
+    keep_md: yes
+classoption: a4paper, 12pt
+documentclass: article
+geometry: left=3.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm
+link-citations: yes
+linkcolor: red
+urlcolor: magenta
+citecolor: green
+csl: ABNT_UFPR_2011-Mendeley.csl
+subtitle: Um estudo de caso
+bibliography: bibliography.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# INTRODUÇÃO
+
+# DESENVOLVIMENTO E FUNDAMENTAÇÃO
+
+```{r}
+## Creating index variable 
+
+# Read the Data
+data = read.csv("cereals.csv", header=T)
+
+# Random sampling
+samplesize = 0.60 * nrow(data)
+set.seed(80)
+index = sample( seq_len ( nrow ( data ) ), size = samplesize )
+
+# Create training and test set
+datatrain = data[ index, ]
+datatest = data[ -index, ]
+```
+
+```{r}
+## Scale data for neural network
+
+max = apply(data , 2 , max)
+min = apply(data, 2 , min)
+scaled = as.data.frame(scale(data, center = min, scale = max - min))
+```
+
+```{r}
+## Fit neural network 
+
+# load library
+library(neuralnet)
+
+# creating training and test set
+trainNN = scaled[index , ]
+testNN = scaled[-index , ]
+
+# fit neural network
+set.seed(2)
+NN = neuralnet(rating ~ calories + protein + fat + sodium + fiber, trainNN, 
+               hidden = 3 , linear.output = T )
+
+# plot neural network
+plot(NN)
+
+```
+
+## Estimativas
+
+```{r}
+## Prediction using neural network
+
+predict_testNN = compute(NN, testNN[,c(1:5)])
+predict_testNN = (predict_testNN$net.result * (max(data$rating) - min(data$rating))) + min(data$rating)
+
+plot(datatest$rating, predict_testNN, col='blue', pch=16, ylab = "predicted rating NN", xlab = "real rating")
+
+abline(0,1)
+
+# Calculate Root Mean Square Error (RMSE)
+RMSE.NN = (sum((datatest$rating - predict_testNN)^2) / nrow(datatest)) ^ 0.5
+```
+
+## Validação Cruzada
+
+```{r, cache = TRUE}
+## Cross validation of neural network model
+
+# Load libraries
+library(boot)
+library(plyr)
+
+# Initialize variables
+set.seed(50)
+k = 100
+RMSE.NN = NULL
+
+List = list( )
+
+# Fit neural network model within nested for loop
+for(j in 10:65){
+    for (i in 1:k) {
+        index = sample(1:nrow(data),j )
+
+        trainNN = scaled[index,]
+        testNN = scaled[-index,]
+        datatest = data[-index,]
+
+        NN = neuralnet(rating ~ calories + protein + fat + sodium + fiber, trainNN, hidden = 3, linear.output= T)
+        predict_testNN = compute(NN,testNN[,c(1:5)])
+        predict_testNN = (predict_testNN$net.result*(max(data$rating)-min(data$rating)))+min(data$rating)
+
+        RMSE.NN [i]<- (sum((datatest$rating - predict_testNN)^2)/nrow(datatest))^0.5
+    }
+    List[[j]] = RMSE.NN
+}
+
+Matrix.RMSE = do.call(cbind, List)
+
+## Prepare boxplot
+boxplot(Matrix.RMSE[,56], ylab = "RMSE", main = "RMSE BoxPlot (length of traning set = 65)")
+
+```
+
+```{r}
+## Variation of median RMSE 
+library(matrixStats)
+
+med = colMedians(Matrix.RMSE)
+
+X = seq(10,65)
+
+plot (med~X, type = "l", xlab = "length of training set", ylab = "median RMSE", main = "Variation of RMSE with length of training set")
+```
+
+# CONCLUSÕES E RECOMENDAÇÕES
+
+# REFERÊNCIAS
