@@ -130,9 +130,9 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{10/10/2018}
+    \date{14/10/2018}
 
-\usepackage[brazil]{babel}
+%\usepackage[brazil]{babel}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{subfig}
@@ -167,12 +167,13 @@ FUNDAMENTAÇÃO}\label{desenvolvimento-e-fundamentacao}
 \NormalTok{## Creating index variable }
 
 \CommentTok{# Read the Data}
-\NormalTok{data =}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"cereals.csv"}\NormalTok{, }\DataTypeTok{header=}\NormalTok{T)}
+\NormalTok{data =}\StringTok{ }\NormalTok{centro_}\DecValTok{2015}\OperatorTok{@}\NormalTok{data[}\KeywordTok{complete.cases}\NormalTok{(centro_}\DecValTok{2015}\OperatorTok{@}\NormalTok{data),]}
+\NormalTok{data}\OperatorTok{$}\NormalTok{padrao <-}\StringTok{ }\KeywordTok{as.numeric}\NormalTok{(data}\OperatorTok{$}\NormalTok{padrao)}
 
 \CommentTok{# Random sampling}
-\NormalTok{samplesize =}\StringTok{ }\FloatTok{0.60} \OperatorTok{*}\StringTok{ }\KeywordTok{nrow}\NormalTok{(data)}
+\NormalTok{samplesize =}\StringTok{ }\FloatTok{0.60}\OperatorTok{*}\KeywordTok{nrow}\NormalTok{(data)}
 \KeywordTok{set.seed}\NormalTok{(}\DecValTok{80}\NormalTok{)}
-\NormalTok{index =}\StringTok{ }\KeywordTok{sample}\NormalTok{( }\KeywordTok{seq_len}\NormalTok{ ( }\KeywordTok{nrow}\NormalTok{ ( data ) ), }\DataTypeTok{size =}\NormalTok{ samplesize )}
+\NormalTok{index =}\StringTok{ }\KeywordTok{sample}\NormalTok{( }\KeywordTok{seq_len}\NormalTok{(}\KeywordTok{nrow}\NormalTok{(data)), }\DataTypeTok{size =}\NormalTok{ samplesize)}
 
 \CommentTok{# Create training and test set}
 \NormalTok{datatrain =}\StringTok{ }\NormalTok{data[ index, ]}
@@ -183,9 +184,8 @@ FUNDAMENTAÇÃO}\label{desenvolvimento-e-fundamentacao}
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{## Scale data for neural network}
-
-\NormalTok{max =}\StringTok{ }\KeywordTok{apply}\NormalTok{(data , }\DecValTok{2}\NormalTok{ , max)}
-\NormalTok{min =}\StringTok{ }\KeywordTok{apply}\NormalTok{(data, }\DecValTok{2}\NormalTok{ , min)}
+\NormalTok{max =}\StringTok{ }\KeywordTok{apply}\NormalTok{(data, }\DecValTok{2}\NormalTok{, max)}
+\NormalTok{min =}\StringTok{ }\KeywordTok{apply}\NormalTok{(data, }\DecValTok{2}\NormalTok{, min)}
 \NormalTok{scaled =}\StringTok{ }\KeywordTok{as.data.frame}\NormalTok{(}\KeywordTok{scale}\NormalTok{(data, }\DataTypeTok{center =}\NormalTok{ min, }\DataTypeTok{scale =}\NormalTok{ max }\OperatorTok{-}\StringTok{ }\NormalTok{min))}
 \end{Highlighting}
 \end{Shaded}
@@ -203,7 +203,7 @@ FUNDAMENTAÇÃO}\label{desenvolvimento-e-fundamentacao}
 
 \CommentTok{# fit neural network}
 \KeywordTok{set.seed}\NormalTok{(}\DecValTok{2}\NormalTok{)}
-\NormalTok{NN =}\StringTok{ }\KeywordTok{neuralnet}\NormalTok{(rating }\OperatorTok{~}\StringTok{ }\NormalTok{calories }\OperatorTok{+}\StringTok{ }\NormalTok{protein }\OperatorTok{+}\StringTok{ }\NormalTok{fat }\OperatorTok{+}\StringTok{ }\NormalTok{sodium }\OperatorTok{+}\StringTok{ }\NormalTok{fiber, trainNN, }
+\NormalTok{NN =}\StringTok{ }\KeywordTok{neuralnet}\NormalTok{(valor }\OperatorTok{~}\StringTok{ }\NormalTok{area_total }\OperatorTok{+}\StringTok{ }\NormalTok{quartos }\OperatorTok{+}\StringTok{ }\NormalTok{suites }\OperatorTok{+}\StringTok{ }\NormalTok{garagens }\OperatorTok{+}\StringTok{ }\NormalTok{dist_b_mar }\OperatorTok{+}\StringTok{ }\NormalTok{padrao, trainNN, }
                \DataTypeTok{hidden =} \DecValTok{3}\NormalTok{ , }\DataTypeTok{linear.output =}\NormalTok{ T )}
 
 \CommentTok{# plot neural network}
@@ -217,10 +217,10 @@ FUNDAMENTAÇÃO}\label{desenvolvimento-e-fundamentacao}
 \begin{Highlighting}[]
 \NormalTok{## Prediction using neural network}
 
-\NormalTok{predict_testNN =}\StringTok{ }\KeywordTok{compute}\NormalTok{(NN, testNN[,}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{5}\NormalTok{)])}
-\NormalTok{predict_testNN =}\StringTok{ }\NormalTok{(predict_testNN}\OperatorTok{$}\NormalTok{net.result }\OperatorTok{*}\StringTok{ }\NormalTok{(}\KeywordTok{max}\NormalTok{(data}\OperatorTok{$}\NormalTok{rating) }\OperatorTok{-}\StringTok{ }\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{rating))) }\OperatorTok{+}\StringTok{ }\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{rating)}
+\NormalTok{predict_testNN =}\StringTok{ }\KeywordTok{compute}\NormalTok{(NN, testNN[,}\DecValTok{2}\OperatorTok{:}\DecValTok{7}\NormalTok{])}
+\NormalTok{predict_testNN =}\StringTok{ }\NormalTok{(predict_testNN}\OperatorTok{$}\NormalTok{net.result }\OperatorTok{*}\StringTok{ }\NormalTok{(}\KeywordTok{max}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor) }\OperatorTok{-}\StringTok{ }\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor))) }\OperatorTok{+}\StringTok{ }\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor)}
 
-\KeywordTok{plot}\NormalTok{(datatest}\OperatorTok{$}\NormalTok{rating, predict_testNN, }\DataTypeTok{col=}\StringTok{'blue'}\NormalTok{, }\DataTypeTok{pch=}\DecValTok{16}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"predicted rating NN"}\NormalTok{, }\DataTypeTok{xlab =} \StringTok{"real rating"}\NormalTok{)}
+\KeywordTok{plot}\NormalTok{(datatest}\OperatorTok{$}\NormalTok{valor, predict_testNN, }\DataTypeTok{col=}\StringTok{'blue'}\NormalTok{, }\DataTypeTok{pch=}\DecValTok{16}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"predicted rating NN"}\NormalTok{, }\DataTypeTok{xlab =} \StringTok{"Valor"}\NormalTok{)}
 
 \KeywordTok{abline}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{)}
 \end{Highlighting}
@@ -231,7 +231,7 @@ FUNDAMENTAÇÃO}\label{desenvolvimento-e-fundamentacao}
 \begin{Shaded}
 \begin{Highlighting}[]
 \CommentTok{# Calculate Root Mean Square Error (RMSE)}
-\NormalTok{RMSE.NN =}\StringTok{ }\NormalTok{(}\KeywordTok{sum}\NormalTok{((datatest}\OperatorTok{$}\NormalTok{rating }\OperatorTok{-}\StringTok{ }\NormalTok{predict_testNN)}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{/}\StringTok{ }\KeywordTok{nrow}\NormalTok{(datatest)) }\OperatorTok{^}\StringTok{ }\FloatTok{0.5}
+\NormalTok{RMSE.NN =}\StringTok{ }\NormalTok{(}\KeywordTok{sum}\NormalTok{((datatest}\OperatorTok{$}\NormalTok{valor }\OperatorTok{-}\StringTok{ }\NormalTok{predict_testNN)}\OperatorTok{^}\DecValTok{2}\NormalTok{) }\OperatorTok{/}\StringTok{ }\KeywordTok{nrow}\NormalTok{(datatest)) }\OperatorTok{^}\StringTok{ }\FloatTok{0.5}
 \end{Highlighting}
 \end{Shaded}
 
@@ -243,28 +243,6 @@ FUNDAMENTAÇÃO}\label{desenvolvimento-e-fundamentacao}
 
 \CommentTok{# Load libraries}
 \KeywordTok{library}\NormalTok{(boot)}
-\end{Highlighting}
-\end{Shaded}
-
-\begin{verbatim}
-## 
-## Attaching package: 'boot'
-\end{verbatim}
-
-\begin{verbatim}
-## The following object is masked from 'package:lattice':
-## 
-##     melanoma
-\end{verbatim}
-
-\begin{verbatim}
-## The following object is masked from 'package:car':
-## 
-##     logit
-\end{verbatim}
-
-\begin{Shaded}
-\begin{Highlighting}[]
 \KeywordTok{library}\NormalTok{(plyr)}
 
 \CommentTok{# Initialize variables}
@@ -275,7 +253,7 @@ FUNDAMENTAÇÃO}\label{desenvolvimento-e-fundamentacao}
 \NormalTok{List =}\StringTok{ }\KeywordTok{list}\NormalTok{( )}
 
 \CommentTok{# Fit neural network model within nested for loop}
-\ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{10}\OperatorTok{:}\DecValTok{65}\NormalTok{)\{}
+\ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{10}\OperatorTok{:}\DecValTok{45}\NormalTok{)\{}
     \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{k) \{}
 \NormalTok{        index =}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{nrow}\NormalTok{(data),j )}
 
@@ -283,11 +261,12 @@ FUNDAMENTAÇÃO}\label{desenvolvimento-e-fundamentacao}
 \NormalTok{        testNN =}\StringTok{ }\NormalTok{scaled[}\OperatorTok{-}\NormalTok{index,]}
 \NormalTok{        datatest =}\StringTok{ }\NormalTok{data[}\OperatorTok{-}\NormalTok{index,]}
 
-\NormalTok{        NN =}\StringTok{ }\KeywordTok{neuralnet}\NormalTok{(rating }\OperatorTok{~}\StringTok{ }\NormalTok{calories }\OperatorTok{+}\StringTok{ }\NormalTok{protein }\OperatorTok{+}\StringTok{ }\NormalTok{fat }\OperatorTok{+}\StringTok{ }\NormalTok{sodium }\OperatorTok{+}\StringTok{ }\NormalTok{fiber, trainNN, }\DataTypeTok{hidden =} \DecValTok{3}\NormalTok{, }\DataTypeTok{linear.output=}\NormalTok{ T)}
-\NormalTok{        predict_testNN =}\StringTok{ }\KeywordTok{compute}\NormalTok{(NN,testNN[,}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{5}\NormalTok{)])}
-\NormalTok{        predict_testNN =}\StringTok{ }\NormalTok{(predict_testNN}\OperatorTok{$}\NormalTok{net.result}\OperatorTok{*}\NormalTok{(}\KeywordTok{max}\NormalTok{(data}\OperatorTok{$}\NormalTok{rating)}\OperatorTok{-}\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{rating)))}\OperatorTok{+}\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{rating)}
+\NormalTok{        NN =}\StringTok{ }\KeywordTok{neuralnet}\NormalTok{(valor }\OperatorTok{~}\StringTok{ }\NormalTok{area_total }\OperatorTok{+}\StringTok{ }\NormalTok{quartos }\OperatorTok{+}\StringTok{ }\NormalTok{suites }\OperatorTok{+}\StringTok{ }\NormalTok{garagens }\OperatorTok{+}\StringTok{ }\NormalTok{dist_b_mar }\OperatorTok{+}\StringTok{ }\NormalTok{padrao,}
+\NormalTok{                       trainNN, }\DataTypeTok{hidden =} \DecValTok{3}\NormalTok{, }\DataTypeTok{linear.output=}\NormalTok{ T)}
+\NormalTok{        predict_testNN =}\StringTok{ }\KeywordTok{compute}\NormalTok{(NN,testNN[,}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\OperatorTok{:}\DecValTok{7}\NormalTok{)])}
+\NormalTok{        predict_testNN =}\StringTok{ }\NormalTok{(predict_testNN}\OperatorTok{$}\NormalTok{net.result}\OperatorTok{*}\NormalTok{(}\KeywordTok{max}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor)}\OperatorTok{-}\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor)))}\OperatorTok{+}\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor)}
 
-\NormalTok{        RMSE.NN [i]<-}\StringTok{ }\NormalTok{(}\KeywordTok{sum}\NormalTok{((datatest}\OperatorTok{$}\NormalTok{rating }\OperatorTok{-}\StringTok{ }\NormalTok{predict_testNN)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{/}\KeywordTok{nrow}\NormalTok{(datatest))}\OperatorTok{^}\FloatTok{0.5}
+\NormalTok{        RMSE.NN[i]<-}\StringTok{ }\NormalTok{(}\KeywordTok{sum}\NormalTok{((datatest}\OperatorTok{$}\NormalTok{valor }\OperatorTok{-}\StringTok{ }\NormalTok{predict_testNN)}\OperatorTok{^}\DecValTok{2}\NormalTok{)}\OperatorTok{/}\KeywordTok{nrow}\NormalTok{(datatest))}\OperatorTok{^}\FloatTok{0.5}
 \NormalTok{    \}}
 \NormalTok{    List[[j]] =}\StringTok{ }\NormalTok{RMSE.NN}
 \NormalTok{\}}
@@ -295,7 +274,7 @@ FUNDAMENTAÇÃO}\label{desenvolvimento-e-fundamentacao}
 \NormalTok{Matrix.RMSE =}\StringTok{ }\KeywordTok{do.call}\NormalTok{(cbind, List)}
 
 \NormalTok{## Prepare boxplot}
-\KeywordTok{boxplot}\NormalTok{(Matrix.RMSE[,}\DecValTok{56}\NormalTok{], }\DataTypeTok{ylab =} \StringTok{"RMSE"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"RMSE BoxPlot (length of traning set = 65)"}\NormalTok{)}
+\KeywordTok{boxplot}\NormalTok{(Matrix.RMSE[,}\DecValTok{36}\NormalTok{], }\DataTypeTok{ylab =} \StringTok{"RMSE"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"RMSE BoxPlot (length of traning set = 45)"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -308,7 +287,7 @@ FUNDAMENTAÇÃO}\label{desenvolvimento-e-fundamentacao}
 
 \NormalTok{med =}\StringTok{ }\KeywordTok{colMedians}\NormalTok{(Matrix.RMSE)}
 
-\NormalTok{X =}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{65}\NormalTok{)}
+\NormalTok{X =}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\DecValTok{10}\NormalTok{,}\DecValTok{45}\NormalTok{)}
 
 \KeywordTok{plot}\NormalTok{ (med}\OperatorTok{~}\NormalTok{X, }\DataTypeTok{type =} \StringTok{"l"}\NormalTok{, }\DataTypeTok{xlab =} \StringTok{"length of training set"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"median RMSE"}\NormalTok{, }\DataTypeTok{main =} \StringTok{"Variation of RMSE with length of training set"}\NormalTok{)}
 \end{Highlighting}

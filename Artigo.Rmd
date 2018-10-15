@@ -31,6 +31,7 @@ bibliography: bibliography.bib
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(appraiseR)
 ```
 
 # INTRODUÇÃO
@@ -41,12 +42,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Creating index variable 
 
 # Read the Data
-data = read.csv("cereals.csv", header=T)
+data = centro_2015@data[complete.cases(centro_2015@data),]
+data$padrao <- as.numeric(data$padrao)
 
 # Random sampling
-samplesize = 0.60 * nrow(data)
+samplesize = 0.60*nrow(data)
 set.seed(80)
-index = sample( seq_len ( nrow ( data ) ), size = samplesize )
+index = sample( seq_len(nrow(data)), size = samplesize)
 
 # Create training and test set
 datatrain = data[ index, ]
@@ -55,9 +57,8 @@ datatest = data[ -index, ]
 
 ```{r}
 ## Scale data for neural network
-
-max = apply(data , 2 , max)
-min = apply(data, 2 , min)
+max = apply(data, 2, max)
+min = apply(data, 2, min)
 scaled = as.data.frame(scale(data, center = min, scale = max - min))
 ```
 
@@ -73,7 +74,7 @@ testNN = scaled[-index , ]
 
 # fit neural network
 set.seed(2)
-NN = neuralnet(rating ~ calories + protein + fat + sodium + fiber, trainNN, 
+NN = neuralnet(valor ~ area_total + quartos + suites + garagens + dist_b_mar + padrao, trainNN, 
                hidden = 3 , linear.output = T )
 
 # plot neural network
@@ -86,15 +87,15 @@ plot(NN)
 ```{r}
 ## Prediction using neural network
 
-predict_testNN = compute(NN, testNN[,c(1:5)])
-predict_testNN = (predict_testNN$net.result * (max(data$rating) - min(data$rating))) + min(data$rating)
+predict_testNN = compute(NN, testNN[,2:7])
+predict_testNN = (predict_testNN$net.result * (max(data$valor) - min(data$valor))) + min(data$valor)
 
-plot(datatest$rating, predict_testNN, col='blue', pch=16, ylab = "predicted rating NN", xlab = "real rating")
+plot(datatest$valor, predict_testNN, col='blue', pch=16, ylab = "predicted rating NN", xlab = "Valor")
 
 abline(0,1)
 
 # Calculate Root Mean Square Error (RMSE)
-RMSE.NN = (sum((datatest$rating - predict_testNN)^2) / nrow(datatest)) ^ 0.5
+RMSE.NN = (sum((datatest$valor - predict_testNN)^2) / nrow(datatest)) ^ 0.5
 ```
 
 ## Validação Cruzada
@@ -114,7 +115,7 @@ RMSE.NN = NULL
 List = list( )
 
 # Fit neural network model within nested for loop
-for(j in 10:65){
+for(j in 10:45){
     for (i in 1:k) {
         index = sample(1:nrow(data),j )
 
@@ -122,11 +123,12 @@ for(j in 10:65){
         testNN = scaled[-index,]
         datatest = data[-index,]
 
-        NN = neuralnet(rating ~ calories + protein + fat + sodium + fiber, trainNN, hidden = 3, linear.output= T)
-        predict_testNN = compute(NN,testNN[,c(1:5)])
-        predict_testNN = (predict_testNN$net.result*(max(data$rating)-min(data$rating)))+min(data$rating)
+        NN = neuralnet(valor ~ area_total + quartos + suites + garagens + dist_b_mar + padrao,
+                       trainNN, hidden = 3, linear.output= T)
+        predict_testNN = compute(NN,testNN[,c(2:7)])
+        predict_testNN = (predict_testNN$net.result*(max(data$valor)-min(data$valor)))+min(data$valor)
 
-        RMSE.NN [i]<- (sum((datatest$rating - predict_testNN)^2)/nrow(datatest))^0.5
+        RMSE.NN[i]<- (sum((datatest$valor - predict_testNN)^2)/nrow(datatest))^0.5
     }
     List[[j]] = RMSE.NN
 }
@@ -134,7 +136,7 @@ for(j in 10:65){
 Matrix.RMSE = do.call(cbind, List)
 
 ## Prepare boxplot
-boxplot(Matrix.RMSE[,56], ylab = "RMSE", main = "RMSE BoxPlot (length of traning set = 65)")
+boxplot(Matrix.RMSE[,36], ylab = "RMSE", main = "RMSE BoxPlot (length of traning set = 45)")
 
 ```
 
@@ -144,7 +146,7 @@ library(matrixStats)
 
 med = colMedians(Matrix.RMSE)
 
-X = seq(10,65)
+X = seq(10,45)
 
 plot (med~X, type = "l", xlab = "length of training set", ylab = "median RMSE", main = "Variation of RMSE with length of training set")
 ```
