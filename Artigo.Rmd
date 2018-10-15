@@ -32,11 +32,11 @@ bibliography: bibliography.bib
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(appraiseR)
+library(neuralnet)
+library(polyreg)
 ```
 
-# INTRODUÇÃO
 
-# DESENVOLVIMENTO E FUNDAMENTAÇÃO
 
 ```{r}
 ## Creating index variable 
@@ -64,9 +64,6 @@ scaled = as.data.frame(scale(data, center = min, scale = max - min))
 
 ```{r}
 ## Fit neural network 
-
-# load library
-library(neuralnet)
 
 # creating training and test set
 trainNN = scaled[index , ]
@@ -150,6 +147,29 @@ X = seq(10,45)
 
 plot (med~X, type = "l", xlab = "length of training set", ylab = "median RMSE", main = "Variation of RMSE with length of training set")
 ```
+
+# REGRESSÃO POLINIMIAL
+
+```{r}
+data <- as.data.frame(data)
+
+
+# Fit neural network model within nested for loop
+for(i in seq(0.2, 0.9, 0.1)){
+  xval.out <- xvalPoly(data, maxDeg = 2, maxInteractDeg = 2, use = "lm", 
+                       trnProp = i, pcaMethod = FALSE)
+  MAE_results[2,i] <- min(xval.out)
+  MAE_results[3,i] <- max(xval.out)
+}
+
+
+Matrix.RMSE = do.call(cbind, List)
+
+## Prepare boxplot
+boxplot(Matrix.RMSE[,36], ylab = "RMSE", main = "RMSE BoxPlot (length of traning set = 45)")
+
+```
+
 
 # CONCLUSÕES E RECOMENDAÇÕES
 
