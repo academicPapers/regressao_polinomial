@@ -23,6 +23,9 @@ Below find publically-available data from the Crossfit annual open, an amateur a
 # Men 2018 Competition
 
 ```{r, results="hide"}
+MAE_results <- matrix(nrow=3, ncol=4, 
+                      dimnames=list(c("kms", "xvalPoly (best)", "xvalPoly (worst)"), competitions))
+
 for(i in seq(0.2, 0.9, 0.1)){
   
   Rx <- read.csv(paste0(competitions[i], ".csv"))

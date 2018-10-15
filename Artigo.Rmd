@@ -71,8 +71,8 @@ testNN = scaled[-index , ]
 
 # fit neural network
 set.seed(2)
-NN = neuralnet(valor ~ area_total + quartos + suites + garagens + dist_b_mar + padrao, trainNN, 
-               hidden = 3 , linear.output = T )
+NN = neuralnet(valor ~ area_total + quartos + suites + garagens + dist_b_mar + 
+                 padrao, data = trainNN, hidden = 1, linear.output = T )
 
 # plot neural network
 plot(NN)
@@ -108,26 +108,27 @@ library(plyr)
 set.seed(50)
 k = 100
 RMSE.NN = NULL
+n <- nrow(data)
 
-List = list( )
+List = list()
 
 # Fit neural network model within nested for loop
-for(j in 10:45){
+for(j in seq(0.2, 0.9, 0.02)){
     for (i in 1:k) {
-        index = sample(1:nrow(data),j )
+        index = sample(1:n,j*n )
 
         trainNN = scaled[index,]
         testNN = scaled[-index,]
         datatest = data[-index,]
 
         NN = neuralnet(valor ~ area_total + quartos + suites + garagens + dist_b_mar + padrao,
-                       trainNN, hidden = 3, linear.output= T)
+                       trainNN, hidden = 1, linear.output= T)
         predict_testNN = compute(NN,testNN[,c(2:7)])
         predict_testNN = (predict_testNN$net.result*(max(data$valor)-min(data$valor)))+min(data$valor)
 
         RMSE.NN[i]<- (sum((datatest$valor - predict_testNN)^2)/nrow(datatest))^0.5
     }
-    List[[j]] = RMSE.NN
+    List[[j*n]] = RMSE.NN
 }
 
 Matrix.RMSE = do.call(cbind, List)
@@ -143,7 +144,7 @@ library(matrixStats)
 
 med = colMedians(Matrix.RMSE)
 
-X = seq(10,45)
+X = seq(0.2, 0.9, 0.02)*n
 
 plot (med~X, type = "l", xlab = "length of training set", ylab = "median RMSE", main = "Variation of RMSE with length of training set")
 ```
@@ -151,15 +152,27 @@ plot (med~X, type = "l", xlab = "length of training set", ylab = "median RMSE", 
 # REGRESSÃO POLINIMIAL
 
 ```{r}
-data <- as.data.frame(data)
+data <- cbind(data[, -1], data[,1])
 
+# Initialize variables
+set.seed(50)
+k = 100
+RMSE.PR = NULL
+n <- nrow(data)
 
-# Fit neural network model within nested for loop
-for(i in seq(0.2, 0.9, 0.1)){
-  xval.out <- xvalPoly(data, maxDeg = 2, maxInteractDeg = 2, use = "lm", 
-                       trnProp = i, pcaMethod = FALSE)
-  MAE_results[2,i] <- min(xval.out)
-  MAE_results[3,i] <- max(xval.out)
+List = list()
+
+# Fit PR model within nested for loop
+for(j in seq(0.2, 0.9, 0.02)){
+  for (i in 1:k) {
+    index = sample(1:n,j*n )
+    trainPR = data[index,]
+    testPR = data[-index,]
+    polyFit.out <- polyFit(trainPR, deg = 2, maxInteractDeg = 2, use = "lm")
+    predict_testPR = predict(polyFit.out, testPR[,c(1:6)])
+    RMSE.PR[i]<- (sum((testPR$valor - predict_testPR)^2)/nrow(trainPR))^0.5
+    }
+  List[[j*n]] = RMSE.PR
 }
 
 
