@@ -30,7 +30,8 @@ bibliography: bibliography.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, message = FALSE, 
+                      warning = FALSE)
 library(appraiseR)
 library(neuralnet)
 library(polyreg)
@@ -71,8 +72,9 @@ testNN = scaled[-index , ]
 
 # fit neural network
 set.seed(2)
-NN = neuralnet(valor ~ area_total + quartos + suites + garagens + dist_b_mar + 
-                 padrao, data = trainNN, hidden = 1, linear.output = T )
+NN = neuralnet(valor ~ area_total + quartos + suites + garagens + 
+                 dist_b_mar + padrao, 
+               data = trainNN, hidden = 1, linear.output = T )
 
 # plot neural network
 plot(NN)
@@ -85,14 +87,18 @@ plot(NN)
 ## Prediction using neural network
 
 predict_testNN = compute(NN, testNN[,2:7])
-predict_testNN = (predict_testNN$net.result * (max(data$valor) - min(data$valor))) + min(data$valor)
+predict_testNN = (predict_testNN$net.result * 
+                    (max(data$valor) - min(data$valor))) + 
+                  min(data$valor)
 
-plot(datatest$valor, predict_testNN, col='blue', pch=16, ylab = "predicted rating NN", xlab = "Valor")
+plot(datatest$valor, predict_testNN, col='blue', pch=16, 
+     ylab = "predicted rating NN", xlab = "Valor")
 
 abline(0,1)
 
 # Calculate Root Mean Square Error (RMSE)
-RMSE.NN = (sum((datatest$valor - predict_testNN)^2) / nrow(datatest)) ^ 0.5
+RMSE.NN = (sum((datatest$valor - 
+                  predict_testNN)^2) / nrow(datatest)) ^ 0.5
 ```
 
 ## Validação Cruzada
@@ -121,12 +127,16 @@ for(j in seq(0.2, 0.9, 0.02)){
         testNN = scaled[-index,]
         datatest = data[-index,]
 
-        NN = neuralnet(valor ~ area_total + quartos + suites + garagens + dist_b_mar + padrao,
+        NN = neuralnet(valor ~ area_total + quartos + suites + 
+                         garagens + dist_b_mar + padrao,
                        trainNN, hidden = 1, linear.output= T)
         predict_testNN = compute(NN,testNN[,c(2:7)])
-        predict_testNN = (predict_testNN$net.result*(max(data$valor)-min(data$valor)))+min(data$valor)
+        predict_testNN = (predict_testNN$net.result*
+                            (max(data$valor) - min(data$valor))) +
+                          min(data$valor)
 
-        RMSE.NN[i]<- (sum((datatest$valor - predict_testNN)^2)/nrow(datatest))^0.5
+        RMSE.NN[i]<- sqrt(sum((datatest$valor - predict_testNN)^2)/
+                            nrow(datatest))
     }
     List[[j*n]] = RMSE.NN
 }
@@ -134,7 +144,9 @@ for(j in seq(0.2, 0.9, 0.02)){
 Matrix.RMSE = do.call(cbind, List)
 
 ## Prepare boxplot
-boxplot(Matrix.RMSE[,36], ylab = "RMSE", main = "RMSE BoxPlot (length of traning set = 45)")
+boxplot(Matrix.RMSE[,36], 
+        ylab = "RMSE", 
+        main = "RMSE BoxPlot (length of traning set = 45)")
 
 ```
 
@@ -146,12 +158,15 @@ med = colMedians(Matrix.RMSE)
 
 X = seq(0.2, 0.9, 0.02)*n
 
-plot (med~X, type = "l", xlab = "length of training set", ylab = "median RMSE", main = "Variation of RMSE with length of training set")
+plot (med~X, type = "l", 
+      xlab = "length of training set", 
+      ylab = "median RMSE", 
+      main = "Variation of RMSE with length of training set")
 ```
 
-# REGRESSÃO POLINIMIAL
+# REGRESSÃO POLINOMIAL
 
-```{r}
+```{r, results ='hide'}
 data <- cbind(data[, -1], data[,1])
 
 # Initialize variables
@@ -168,9 +183,11 @@ for(j in seq(0.2, 0.9, 0.02)){
     index = sample(1:n,j*n )
     trainPR = data[index,]
     testPR = data[-index,]
-    polyFit.out <- polyFit(trainPR, deg = 2, maxInteractDeg = 2, use = "lm")
+    polyFit.out <- polyFit(trainPR, deg = 2, maxInteractDeg = 2, 
+                           use = "lm", pcaMethod = "prcomp")
     predict_testPR = predict(polyFit.out, testPR[,c(1:6)])
-    RMSE.PR[i]<- (sum((testPR$valor - predict_testPR)^2)/nrow(trainPR))^0.5
+    RMSE.PR[i]<- sqrt(sum((testPR$valor - predict_testPR)^2)/
+                        nrow(trainPR))
     }
   List[[j*n]] = RMSE.PR
 }
@@ -179,10 +196,22 @@ for(j in seq(0.2, 0.9, 0.02)){
 Matrix.RMSE = do.call(cbind, List)
 
 ## Prepare boxplot
-boxplot(Matrix.RMSE[,36], ylab = "RMSE", main = "RMSE BoxPlot (length of traning set = 45)")
-
+boxplot(Matrix.RMSE[,36], 
+        ylab = "RMSE", 
+        main = "RMSE BoxPlot (length of traning set = 45)")
 ```
 
+```{r}
+## Variation of median RMSE 
+med = colMedians(Matrix.RMSE)
+
+X = seq(0.2, 0.9, 0.02)*n
+
+plot (med~X, type = "l", 
+      xlab = "length of training set", 
+      ylab = "median RMSE", 
+      main = "Variation of RMSE with length of training set")
+```
 
 # CONCLUSÕES E RECOMENDAÇÕES
 

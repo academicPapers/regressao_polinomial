@@ -1,11 +1,4 @@
 base
-methods
-datasets
-utils
-grDevices
-graphics
-stats
-tcltk
 carData
 car
 lattice
@@ -14,3 +7,10 @@ Matrix
 neuralnet
 boot
 plyr
+appraiseR
+FNN
+mvtnorm
+dummies
+regtools
+polyreg
+matrixStats
