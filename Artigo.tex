@@ -130,7 +130,7 @@
   \postauthor{\par}
       \predate{\centering\large\emph}
   \postdate{\par}
-    \date{22/10/2018}
+    \date{24/10/2018}
 
 %\usepackage[brazil]{babel}
 \usepackage{graphicx}
@@ -197,7 +197,7 @@
 \KeywordTok{set.seed}\NormalTok{(}\DecValTok{2}\NormalTok{)}
 \NormalTok{NN =}\StringTok{ }\KeywordTok{neuralnet}\NormalTok{(valor }\OperatorTok{~}\StringTok{ }\NormalTok{area_total }\OperatorTok{+}\StringTok{ }\NormalTok{quartos }\OperatorTok{+}\StringTok{ }\NormalTok{suites }\OperatorTok{+}\StringTok{ }\NormalTok{garagens }\OperatorTok{+}\StringTok{ }
 \StringTok{                 }\NormalTok{dist_b_mar }\OperatorTok{+}\StringTok{ }\NormalTok{padrao, }
-               \DataTypeTok{data =}\NormalTok{ trainNN, }\DataTypeTok{hidden =} \DecValTok{1}\NormalTok{, }\DataTypeTok{linear.output =}\NormalTok{ T )}
+               \DataTypeTok{data =}\NormalTok{ trainNN, }\DataTypeTok{hidden =} \DecValTok{2}\NormalTok{, }\DataTypeTok{linear.output =}\NormalTok{ T)}
 
 \CommentTok{# plot neural network}
 \KeywordTok{plot}\NormalTok{(NN)}
@@ -211,9 +211,9 @@
 \NormalTok{## Prediction using neural network}
 
 \NormalTok{predict_testNN =}\StringTok{ }\KeywordTok{compute}\NormalTok{(NN, testNN[,}\DecValTok{2}\OperatorTok{:}\DecValTok{7}\NormalTok{])}
-\NormalTok{predict_testNN =}\StringTok{ }\NormalTok{(predict_testNN}\OperatorTok{$}\NormalTok{net.result }\OperatorTok{*}\StringTok{ }\NormalTok{(}\KeywordTok{max}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor) }\OperatorTok{-}\StringTok{ }
-\StringTok{                                                 }\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor))) }\OperatorTok{+}\StringTok{ }
-\StringTok{  }\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor)}
+\NormalTok{predict_testNN =}\StringTok{ }\NormalTok{(predict_testNN}\OperatorTok{$}\NormalTok{net.result }\OperatorTok{*}\StringTok{ }
+\StringTok{                    }\NormalTok{(}\KeywordTok{max}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor) }\OperatorTok{-}\StringTok{ }\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor))) }\OperatorTok{+}\StringTok{ }
+\StringTok{                  }\KeywordTok{min}\NormalTok{(data}\OperatorTok{$}\NormalTok{valor)}
 
 \KeywordTok{plot}\NormalTok{(datatest}\OperatorTok{$}\NormalTok{valor, predict_testNN, }\DataTypeTok{col=}\StringTok{'blue'}\NormalTok{, }\DataTypeTok{pch=}\DecValTok{16}\NormalTok{, }
      \DataTypeTok{ylab =} \StringTok{"predicted rating NN"}\NormalTok{, }\DataTypeTok{xlab =} \StringTok{"Valor"}\NormalTok{)}
