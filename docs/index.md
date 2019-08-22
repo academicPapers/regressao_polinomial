@@ -14,8 +14,8 @@ VIII Simpósio da SOBREA
 
 Para ler o artigo em PDF [clique aqui.](https://github.com/lfpdroubi/regressao_polinomial/blob/master/ARTIGO_DE_ RP_E_RN.pdf)
 
-Para ver a apresentação [clique aqui.](https://github.com/lfpdroubi/regressao_polinomial/blob/master/docs/apresentacao_SOBREA.ppt)
-
+Para ver a apresentação [clique aqui.](https://github.com/lfpdroubi/regressao_polinomial/raw/master/docs/apresentacao_SOBREA.ppt)
+                                      
 ## Status
 
 - [x] Para revisão
